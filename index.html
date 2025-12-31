@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Smart Calculator</title>
+<title>Scientific Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -19,12 +19,12 @@ body {
   background:#020617;
   padding:20px;
   border-radius:16px;
-  width:330px;
+  width:360px;
 }
 
 .mode-switch {
   display:flex;
-  margin-bottom:12px;
+  margin-bottom:10px;
 }
 
 .mode-switch button {
@@ -49,7 +49,7 @@ body {
   padding:10px;
   border:none;
   border-radius:10px;
-  margin-bottom:15px;
+  margin-bottom:12px;
   background:#0f172a;
   color:white;
 }
@@ -62,7 +62,7 @@ body {
 
 button {
   height:55px;
-  font-size:16px;
+  font-size:15px;
   border:none;
   border-radius:10px;
   background:#1e293b;
@@ -74,6 +74,7 @@ button {
 .equal { grid-column:span 2; background:#22c55e; }
 .clear { background:#ef4444; }
 .advanced { display:none; }
+.toggle { background:#9333ea; }
 </style>
 </head>
 
@@ -113,14 +114,19 @@ button {
     <button class="equal" onclick="calculate()">=</button>
 
     <!-- Advanced -->
+    <button class="advanced" onclick="toggleDeg()">DEG</button>
     <button class="advanced" onclick="applyUnary('sqrt')">√</button>
     <button class="advanced" onclick="applyUnary('square')">x²</button>
+    <button class="advanced" onclick="applyUnary('cube')">x³</button>
+
     <button class="advanced" onclick="applyUnary('sin')">sin</button>
     <button class="advanced" onclick="applyUnary('cos')">cos</button>
-
     <button class="advanced" onclick="applyUnary('tan')">tan</button>
     <button class="advanced" onclick="applyUnary('log')">log</button>
+
     <button class="advanced" onclick="addPi()">π</button>
+    <button class="advanced" onclick="addTheta()">θ</button>
+    <button class="advanced" onclick="toFraction()">a/b</button>
   </div>
 </div>
 
@@ -128,6 +134,8 @@ button {
 let display = document.getElementById("display");
 let current = "";
 let pendingFunc = null;
+let isDegree = true;
+let thetaValue = 45;
 
 function addNum(n) {
   current += n;
@@ -151,23 +159,37 @@ function addPi() {
   display.value += "π";
 }
 
+function addTheta() {
+  current = thetaValue.toString();
+  display.value += "θ";
+}
+
 function applyUnary(type) {
   pendingFunc = type;
   display.value += type === "sqrt" ? "√"
-                : type === "square" ? "²"
-                : type;
+    : type === "square" ? "²"
+    : type === "cube" ? "³"
+    : type;
+}
+
+function toggleDeg() {
+  isDegree = !isDegree;
+  alert(isDegree ? "Degree Mode" : "Radian Mode");
 }
 
 function calculate() {
   try {
-    let result;
-
     if (pendingFunc && current !== "") {
       let num = parseFloat(current);
+      if (isDegree && ["sin","cos","tan"].includes(pendingFunc)) {
+        num = num * Math.PI / 180;
+      }
 
+      let result;
       switch (pendingFunc) {
         case "sqrt": result = Math.sqrt(num); break;
         case "square": result = num ** 2; break;
+        case "cube": result = num ** 3; break;
         case "sin": result = Math.sin(num); break;
         case "cos": result = Math.cos(num); break;
         case "tan": result = Math.tan(num); break;
@@ -177,15 +199,23 @@ function calculate() {
       display.value = result;
       current = result.toString();
       pendingFunc = null;
-    } else {
-      display.value = eval(display.value.replace(/÷/g,"/").replace(/×/g,"*").replace(/π/g,Math.PI));
-      current = display.value;
     }
   } catch {
     display.value = "Error";
     current = "";
     pendingFunc = null;
   }
+}
+
+function toFraction() {
+  let num = parseFloat(display.value);
+  if (isNaN(num)) return;
+  let denom = 1;
+  while (num % 1 !== 0) {
+    num *= 10;
+    denom *= 10;
+  }
+  display.value = `${num}/${denom}`;
 }
 
 function clearAll() {
@@ -195,8 +225,8 @@ function clearAll() {
 }
 
 function back() {
-  display.value = display.value.slice(0,-1);
-  current = current.slice(0,-1);
+  display.value = display.value.slice(0, -1);
+  current = current.slice(0, -1);
 }
 
 function setMode(mode) {
