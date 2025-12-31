@@ -22,6 +22,14 @@ body {
   width:360px;
 }
 
+.top {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:8px;
+  color:white;
+  font-size:14px;
+}
+
 .mode-switch {
   display:flex;
   margin-bottom:10px;
@@ -29,7 +37,7 @@ body {
 
 .mode-switch button {
   flex:1;
-  padding:10px;
+  padding:8px;
   border:none;
   background:#1e293b;
   color:white;
@@ -74,13 +82,18 @@ button {
 .equal { grid-column:span 2; background:#22c55e; }
 .clear { background:#ef4444; }
 .advanced { display:none; }
-.toggle { background:#9333ea; }
+.degree { background:#9333ea; }
 </style>
 </head>
 
 <body>
 
 <div class="calculator">
+
+  <div class="top">
+    <span id="angleMode">°</span>
+    <span>θ = 45</span>
+  </div>
 
   <div class="mode-switch">
     <button id="basicBtn" class="active" onclick="setMode('basic')">Basic</button>
@@ -91,120 +104,66 @@ button {
 
   <div class="buttons">
     <button class="clear" onclick="clearAll()">C</button>
-    <button onclick="addOp('/')">÷</button>
-    <button onclick="addOp('*')">×</button>
+    <button onclick="append('÷')">÷</button>
+    <button onclick="append('×')">×</button>
     <button onclick="back()">⌫</button>
 
-    <button onclick="addNum(7)">7</button>
-    <button onclick="addNum(8)">8</button>
-    <button onclick="addNum(9)">9</button>
-    <button class="operator" onclick="addOp('-')">−</button>
+    <button onclick="append('7')">7</button>
+    <button onclick="append('8')">8</button>
+    <button onclick="append('9')">9</button>
+    <button class="operator" onclick="append('-')">−</button>
 
-    <button onclick="addNum(4)">4</button>
-    <button onclick="addNum(5)">5</button>
-    <button onclick="addNum(6)">6</button>
-    <button class="operator" onclick="addOp('+')">+</button>
+    <button onclick="append('4')">4</button>
+    <button onclick="append('5')">5</button>
+    <button onclick="append('6')">6</button>
+    <button class="operator" onclick="append('+')">+</button>
 
-    <button onclick="addNum(1)">1</button>
-    <button onclick="addNum(2)">2</button>
-    <button onclick="addNum(3)">3</button>
-    <button onclick="addDot()">.</button>
+    <button onclick="append('1')">1</button>
+    <button onclick="append('2')">2</button>
+    <button onclick="append('3')">3</button>
+    <button onclick="append('.')">.</button>
 
-    <button onclick="addNum(0)">0</button>
+    <button onclick="append('0')">0</button>
     <button class="equal" onclick="calculate()">=</button>
 
     <!-- Advanced -->
-    <button class="advanced" onclick="toggleDeg()">DEG</button>
-    <button class="advanced" onclick="applyUnary('sqrt')">√</button>
-    <button class="advanced" onclick="applyUnary('square')">x²</button>
-    <button class="advanced" onclick="applyUnary('cube')">x³</button>
+    <button class="advanced degree" onclick="toggleAngle()">° / rad</button>
+    <button class="advanced" onclick="append('√')">√</button>
+    <button class="advanced" onclick="append('²')">x²</button>
+    <button class="advanced" onclick="append('³')">x³</button>
 
-    <button class="advanced" onclick="applyUnary('sin')">sin</button>
-    <button class="advanced" onclick="applyUnary('cos')">cos</button>
-    <button class="advanced" onclick="applyUnary('tan')">tan</button>
-    <button class="advanced" onclick="applyUnary('log')">log</button>
+    <button class="advanced" onclick="append('sin')">sin</button>
+    <button class="advanced" onclick="append('cos')">cos</button>
+    <button class="advanced" onclick="append('tan')">tan</button>
+    <button class="advanced" onclick="append('log')">log</button>
 
-    <button class="advanced" onclick="addPi()">π</button>
-    <button class="advanced" onclick="addTheta()">θ</button>
+    <button class="advanced" onclick="append('π')">π</button>
+    <button class="advanced" onclick="append('θ')">θ</button>
     <button class="advanced" onclick="toFraction()">a/b</button>
   </div>
 </div>
 
 <script>
 let display = document.getElementById("display");
-let current = "";
-let pendingFunc = null;
+let angleMode = document.getElementById("angleMode");
 let isDegree = true;
 let thetaValue = 45;
 
-function addNum(n) {
-  current += n;
-  display.value += n;
+function append(val) {
+  display.value += val;
 }
 
-function addDot() {
-  if (!current.includes(".")) {
-    current += ".";
-    display.value += ".";
-  }
+function clearAll() {
+  display.value = "";
 }
 
-function addOp(op) {
-  display.value += op;
-  current = "";
+function back() {
+  display.value = display.value.slice(0,-1);
 }
 
-function addPi() {
-  current = Math.PI.toString();
-  display.value += "π";
-}
-
-function addTheta() {
-  current = thetaValue.toString();
-  display.value += "θ";
-}
-
-function applyUnary(type) {
-  pendingFunc = type;
-  display.value += type === "sqrt" ? "√"
-    : type === "square" ? "²"
-    : type === "cube" ? "³"
-    : type;
-}
-
-function toggleDeg() {
+function toggleAngle() {
   isDegree = !isDegree;
-  alert(isDegree ? "Degree Mode" : "Radian Mode");
-}
-
-function calculate() {
-  try {
-    if (pendingFunc && current !== "") {
-      let num = parseFloat(current);
-      if (isDegree && ["sin","cos","tan"].includes(pendingFunc)) {
-        num = num * Math.PI / 180;
-      }
-
-      let result;
-      switch (pendingFunc) {
-        case "sqrt": result = Math.sqrt(num); break;
-        case "square": result = num ** 2; break;
-        case "cube": result = num ** 3; break;
-        case "sin": result = Math.sin(num); break;
-        case "cos": result = Math.cos(num); break;
-        case "tan": result = Math.tan(num); break;
-        case "log": result = Math.log10(num); break;
-      }
-
-      display.value = result;
-      current = result.toString();
-      pendingFunc = null;
-    }
-  } catch {
-    display.value = "Error";
-    current = "";
-    pendingFunc = null;
-  }
+  angleMode.textContent = isDegree ? "°" : "rad";
 }
 
 function toFraction() {
@@ -218,15 +177,31 @@ function toFraction() {
   display.value = `${num}/${denom}`;
 }
 
-function clearAll() {
-  display.value = "";
-  current = "";
-  pendingFunc = null;
-}
+function calculate() {
+  try {
+    let exp = display.value;
 
-function back() {
-  display.value = display.value.slice(0, -1);
-  current = current.slice(0, -1);
+    exp = exp.replace(/÷/g,"/")
+             .replace(/×/g,"*")
+             .replace(/π/g,Math.PI)
+             .replace(/θ/g,thetaValue)
+             .replace(/√/g,"Math.sqrt")
+             .replace(/log/g,"Math.log10")
+             .replace(/²/g,"**2")
+             .replace(/³/g,"**3");
+
+    exp = exp.replace(/sin|cos|tan/g, m => `Math.${m}`);
+
+    if (isDegree) {
+      exp = exp.replace(/Math\.(sin|cos|tan)\(([^)]+)\)/g,
+        (_, fn, val) => `Math.${fn}((${val})*Math.PI/180)`
+      );
+    }
+
+    display.value = eval(exp);
+  } catch {
+    display.value = "Error";
+  }
 }
 
 function setMode(mode) {
