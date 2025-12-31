@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Simple Calculator</title>
+<title>Mode Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -19,7 +19,26 @@ body {
   background: #020617;
   padding: 20px;
   border-radius: 16px;
-  width: 280px;
+  width: 320px;
+}
+
+.mode-switch {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.mode-switch button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  background: #1e293b;
+  color: white;
+  font-weight: bold;
+}
+
+.mode-switch button.active {
+  background: #2563eb;
 }
 
 #display {
@@ -43,7 +62,7 @@ body {
 
 button {
   height: 55px;
-  font-size: 18px;
+  font-size: 16px;
   border: none;
   border-radius: 10px;
   cursor: pointer;
@@ -59,25 +78,17 @@ button:hover {
   background: #2563eb;
 }
 
-.operator:hover {
-  background: #1d4ed8;
-}
-
 .equal {
   grid-column: span 2;
   background: #22c55e;
-}
-
-.equal:hover {
-  background: #16a34a;
 }
 
 .clear {
   background: #ef4444;
 }
 
-.clear:hover {
-  background: #dc2626;
+.advanced {
+  display: none;
 }
 </style>
 </head>
@@ -85,9 +96,16 @@ button:hover {
 <body>
 
 <div class="calculator">
+
+  <div class="mode-switch">
+    <button id="basicBtn" class="active" onclick="setMode('basic')">Basic</button>
+    <button id="advBtn" onclick="setMode('advanced')">Advanced</button>
+  </div>
+
   <input type="text" id="display" disabled>
 
   <div class="buttons">
+
     <button class="clear" onclick="clearDisplay()">C</button>
     <button onclick="appendValue('/')">÷</button>
     <button onclick="appendValue('*')">×</button>
@@ -110,14 +128,30 @@ button:hover {
 
     <button onclick="appendValue('0')">0</button>
     <button class="equal" onclick="calculate()">=</button>
+
+    <!-- Advanced buttons -->
+    <button class="advanced" onclick="appendFunc('Math.sqrt(')">√</button>
+    <button class="advanced" onclick="appendValue('**2')">x²</button>
+    <button class="advanced" onclick="appendFunc('Math.sin(')">sin</button>
+    <button class="advanced" onclick="appendFunc('Math.cos(')">cos</button>
+
+    <button class="advanced" onclick="appendFunc('Math.log10(')">log</button>
+    <button class="advanced" onclick="appendFunc('Math.tan(')">tan</button>
+    <button class="advanced" onclick="appendValue('Math.PI')">π</button>
+    <button class="advanced" onclick="appendValue(')')">)</button>
+
   </div>
 </div>
 
 <script>
 let display = document.getElementById("display");
 
-function appendValue(value) {
-  display.value += value;
+function appendValue(val) {
+  display.value += val;
+}
+
+function appendFunc(func) {
+  display.value += func;
 }
 
 function clearDisplay() {
@@ -133,6 +167,22 @@ function calculate() {
     display.value = eval(display.value);
   } catch {
     display.value = "Error";
+  }
+}
+
+function setMode(mode) {
+  let advButtons = document.querySelectorAll(".advanced");
+  let basicBtn = document.getElementById("basicBtn");
+  let advBtn = document.getElementById("advBtn");
+
+  if (mode === "advanced") {
+    advButtons.forEach(b => b.style.display = "block");
+    advBtn.classList.add("active");
+    basicBtn.classList.remove("active");
+  } else {
+    advButtons.forEach(b => b.style.display = "none");
+    basicBtn.classList.add("active");
+    advBtn.classList.remove("active");
   }
 }
 </script>
